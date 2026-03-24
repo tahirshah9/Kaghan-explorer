@@ -16,15 +16,19 @@ export default function Home() {
   useEffect(() => {
     if (!db) return;
     
-    const unsubDests = onSnapshot(query(collection(db, "destinations"), limit(6)), (snapshot) => {
+    const unsubDests = onSnapshot(collection(db, "destinations"), (snapshot) => {
       if (!snapshot.empty) {
-        setDestinations(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Destination)));
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Destination));
+        const featured = data.filter(d => d.featured);
+        setDestinations(featured.length > 0 ? featured : data.slice(0, 6));
       }
     });
 
-    const unsubPkgs = onSnapshot(query(collection(db, "packages"), limit(3)), (snapshot) => {
+    const unsubPkgs = onSnapshot(collection(db, "packages"), (snapshot) => {
       if (!snapshot.empty) {
-        setPackages(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as TourPackage)));
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as TourPackage));
+        const featured = data.filter(p => p.featured);
+        setPackages(featured.length > 0 ? featured : data.slice(0, 3));
       }
     });
 

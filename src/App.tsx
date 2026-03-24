@@ -13,6 +13,7 @@ import Guide from "./pages/Guide";
 import Gallery from "./pages/Gallery";
 import Contact from "./pages/Contact";
 import Admin from "./pages/Admin";
+import Partner from "./pages/Partner";
 import { MessageSquare } from "lucide-react";
 
 export default function App() {
@@ -27,6 +28,7 @@ export default function App() {
           <Route path="guide" element={<Guide />} />
           <Route path="gallery" element={<Gallery />} />
           <Route path="contact" element={<Contact />} />
+          <Route path="partner" element={<Partner />} />
           <Route path="admin" element={<Admin />} />
         </Route>
       </Routes>

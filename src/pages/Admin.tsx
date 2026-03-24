@@ -12,6 +12,7 @@ export default function Admin() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [inquiries, setInquiries] = useState<any[]>([]);
   const [subscribers, setSubscribers] = useState<any[]>([]);
+  const [partners, setPartners] = useState<any[]>([]);
   const [destinations, setDestinations] = useState<any[]>([]);
   const [hotels, setHotels] = useState<any[]>([]);
   const [packages, setPackages] = useState<any[]>([]);
@@ -60,6 +61,11 @@ export default function Admin() {
       setSubscribers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
 
+    const qPartners = query(collection(db, "partnerships"), orderBy("createdAt", "desc"), limit(50));
+    const unsubPartners = onSnapshot(qPartners, (snapshot) => {
+      setPartners(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
     const unsubDests = onSnapshot(collection(db, "destinations"), (snapshot) => {
       setDestinations(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
@@ -75,6 +81,7 @@ export default function Admin() {
     return () => {
       unsubInquiries();
       unsubSubs();
+      unsubPartners();
       unsubDests();
       unsubHotels();
       unsubPkgs();
@@ -91,7 +98,7 @@ export default function Admin() {
       const destSnap = await getDocs(collection(db, "destinations"));
       if (destSnap.empty) {
         for (const dest of DESTINATIONS) {
-          await addDoc(collection(db, "destinations"), dest);
+          await addDoc(collection(db, "destinations"), { ...dest, featured: true });
         }
       }
 
@@ -107,11 +114,11 @@ export default function Admin() {
       const pkgSnap = await getDocs(collection(db, "packages"));
       if (pkgSnap.empty) {
         for (const pkg of PACKAGES) {
-          await addDoc(collection(db, "packages"), pkg);
+          await addDoc(collection(db, "packages"), { ...pkg, featured: true });
         }
       }
 
-      alert("Database seeded successfully!");
+      alert("Database seeded successfully with expanded data!");
     } catch (error) {
       console.error("Error seeding data:", error);
       alert("Error seeding data. Check console.");
@@ -182,6 +189,7 @@ export default function Admin() {
             { id: "dashboard", icon: LayoutDashboard, label: "Dashboard" },
             { id: "inquiries", icon: MessageSquare, label: "Inquiries" },
             { id: "subscribers", icon: Mail, label: "Subscribers" },
+            { id: "partnerships", icon: Users, label: "Partnerships" },
             { id: "destinations", icon: MapPin, label: "Destinations" },
             { id: "hotels", icon: Hotel, label: "Hotels" },
             { id: "packages", icon: Package, label: "Packages" },
@@ -315,6 +323,48 @@ export default function Admin() {
             </div>
           )}
 
+          {activeTab === "partnerships" && (
+            <div className="space-y-6">
+              {partners.map((partner) => (
+                <div key={partner.id} className="p-6 border border-emerald-50 rounded-2xl space-y-4">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-bold text-emerald-950 text-xl">{partner.businessName}</h4>
+                      <p className="text-sm text-emerald-800/60 uppercase font-bold tracking-wider">{partner.businessType}</p>
+                    </div>
+                    <span className="bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-1 rounded-full uppercase">
+                      {partner.status}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="text-emerald-800/40 font-bold uppercase text-[10px]">Contact Person</p>
+                      <p className="text-emerald-950 font-medium">{partner.contactPerson}</p>
+                    </div>
+                    <div>
+                      <p className="text-emerald-800/40 font-bold uppercase text-[10px]">Email</p>
+                      <p className="text-emerald-950 font-medium">{partner.email}</p>
+                    </div>
+                    <div>
+                      <p className="text-emerald-800/40 font-bold uppercase text-[10px]">Phone</p>
+                      <p className="text-emerald-950 font-medium">{partner.phone}</p>
+                    </div>
+                    <div>
+                      <p className="text-emerald-800/40 font-bold uppercase text-[10px]">Applied On</p>
+                      <p className="text-emerald-950 font-medium">
+                        {partner.createdAt?.toDate ? partner.createdAt.toDate().toLocaleDateString() : "Just now"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="pt-4 border-t border-emerald-50">
+                    <p className="text-emerald-800/40 font-bold uppercase text-[10px] mb-1">Message</p>
+                    <p className="text-emerald-800/60 text-sm italic">"{partner.message}"</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           {["destinations", "hotels", "packages"].includes(activeTab) && (
             <div className="space-y-8">
               {showAddForm && (
@@ -329,6 +379,10 @@ export default function Admin() {
                         <input type="text" placeholder="Best Time" className="p-3 rounded-xl border border-emerald-200" onChange={e => setFormData({...formData, bestTime: e.target.value})} required />
                         <input type="text" placeholder="Distance" className="p-3 rounded-xl border border-emerald-200" onChange={e => setFormData({...formData, distance: e.target.value})} required />
                         <input type="text" placeholder="Difficulty" className="p-3 rounded-xl border border-emerald-200" onChange={e => setFormData({...formData, difficulty: e.target.value})} required />
+                        <label className="flex items-center space-x-2 p-3 rounded-xl border border-emerald-200">
+                          <input type="checkbox" onChange={e => setFormData({...formData, featured: e.target.checked})} />
+                          <span className="text-sm text-emerald-800/60">Featured on Home</span>
+                        </label>
                         <textarea placeholder="Description" className="p-3 rounded-xl border border-emerald-200 md:col-span-2" onChange={e => setFormData({...formData, description: e.target.value})} required />
                       </>
                     )}
@@ -350,6 +404,10 @@ export default function Admin() {
                         <input type="text" placeholder="Group Size" className="p-3 rounded-xl border border-emerald-200" onChange={e => setFormData({...formData, groupSize: e.target.value})} required />
                         <input type="text" placeholder="WhatsApp Number (e.g. 923001234567)" className="p-3 rounded-xl border border-emerald-200" onChange={e => setFormData({...formData, whatsappNumber: e.target.value})} required />
                         <input type="text" placeholder="Image URL" className="p-3 rounded-xl border border-emerald-200" onChange={e => setFormData({...formData, image: e.target.value})} required />
+                        <label className="flex items-center space-x-2 p-3 rounded-xl border border-emerald-200">
+                          <input type="checkbox" onChange={e => setFormData({...formData, featured: e.target.checked})} />
+                          <span className="text-sm text-emerald-800/60">Featured on Home</span>
+                        </label>
                         <textarea placeholder="Itinerary (comma separated)" className="p-3 rounded-xl border border-emerald-200 md:col-span-2" onChange={e => setFormData({...formData, itinerary: e.target.value.split(",")})} required />
                       </>
                     )}
@@ -363,16 +421,31 @@ export default function Admin() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {(activeTab === "destinations" ? destinations : activeTab === "hotels" ? hotels : packages).map((item) => (
-                  <div key={item.id} className="bg-emerald-50 rounded-2xl p-6 space-y-4 relative group">
+                  <div key={item.id} className="bg-emerald-50 rounded-2xl p-6 space-y-4 relative group border border-emerald-100">
                     <button 
                       onClick={() => deleteItem(item.id)}
-                      className="absolute top-4 right-4 bg-red-500 text-white p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-4 right-4 bg-red-500 text-white p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity z-10"
                     >
                       <LogOut className="h-4 w-4" />
                     </button>
+                    {item.featured && (
+                      <span className="absolute top-4 left-4 bg-amber-400 text-emerald-950 text-[10px] font-bold px-2 py-1 rounded-full z-10">
+                        FEATURED
+                      </span>
+                    )}
                     <img src={item.photo || item.photos?.[0] || item.image} alt="" className="w-full h-32 object-cover rounded-xl" />
-                    <h4 className="font-bold text-emerald-950">{item.name || item.title}</h4>
-                    <p className="text-xs text-emerald-800/60 line-clamp-2">{item.description || item.location || item.duration}</p>
+                    <div>
+                      <h4 className="font-bold text-emerald-950">{item.name || item.title}</h4>
+                      <div className="flex justify-between items-center mt-1">
+                        <span className="text-[10px] text-emerald-800/40 uppercase font-bold">
+                          {item.category || item.location || item.duration}
+                        </span>
+                        {item.price && (
+                          <span className="text-xs font-bold text-emerald-900">Rs. {item.price.toLocaleString()}</span>
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-xs text-emerald-800/60 line-clamp-2">{item.description || item.amenities?.join(", ")}</p>
                   </div>
                 ))}
               </div>

@@ -6,7 +6,8 @@ export interface Destination {
   bestTime: string;
   distance: string;
   difficulty: 'Easy' | 'Moderate' | 'Hard';
-  category: 'Lakes' | 'Meadows' | 'Mountains' | 'Towns';
+  category: string;
+  featured?: boolean;
 }
 
 export interface Hotel {
@@ -30,6 +31,7 @@ export interface TourPackage {
   groupSize: string;
   image: string;
   whatsappNumber?: string;
+  featured?: boolean;
 }
 
 export interface ContactSubmission {
