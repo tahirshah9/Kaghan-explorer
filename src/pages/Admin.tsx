@@ -348,7 +348,8 @@ export default function Admin() {
                         <input type="text" placeholder="Duration" className="p-3 rounded-xl border border-emerald-200" onChange={e => setFormData({...formData, duration: e.target.value})} required />
                         <input type="number" placeholder="Price" className="p-3 rounded-xl border border-emerald-200" onChange={e => setFormData({...formData, price: Number(e.target.value)})} required />
                         <input type="text" placeholder="Group Size" className="p-3 rounded-xl border border-emerald-200" onChange={e => setFormData({...formData, groupSize: e.target.value})} required />
-                        <input type="text" placeholder="Image URL" className="p-3 rounded-xl border border-emerald-200 md:col-span-2" onChange={e => setFormData({...formData, image: e.target.value})} required />
+                        <input type="text" placeholder="WhatsApp Number (e.g. 923001234567)" className="p-3 rounded-xl border border-emerald-200" onChange={e => setFormData({...formData, whatsappNumber: e.target.value})} required />
+                        <input type="text" placeholder="Image URL" className="p-3 rounded-xl border border-emerald-200" onChange={e => setFormData({...formData, image: e.target.value})} required />
                         <textarea placeholder="Itinerary (comma separated)" className="p-3 rounded-xl border border-emerald-200 md:col-span-2" onChange={e => setFormData({...formData, itinerary: e.target.value.split(",")})} required />
                       </>
                     )}

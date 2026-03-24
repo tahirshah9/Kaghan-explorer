@@ -1,8 +1,15 @@
 import { TourPackage } from "../types";
-import { Clock, Users, CheckCircle2 } from "lucide-react";
+import { Clock, Users, CheckCircle2, MessageCircle } from "lucide-react";
 import { motion } from "motion/react";
 
 export default function PackageCard({ pkg }: { pkg: TourPackage }) {
+  const handleWhatsApp = () => {
+    const message = `Hi! I'm interested in the "${pkg.title}" package (${pkg.duration}) priced at Rs. ${pkg.price.toLocaleString()}. Can you provide more details?`;
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${pkg.whatsappNumber || "923000000000"}?text=${encodedMessage}`;
+    window.open(whatsappUrl, "_blank");
+  };
+
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
@@ -48,8 +55,12 @@ export default function PackageCard({ pkg }: { pkg: TourPackage }) {
             <p className="text-emerald-100/40 text-xs uppercase font-bold">Starting from</p>
             <span className="text-3xl font-bold text-white">Rs. {pkg.price.toLocaleString()}</span>
           </div>
-          <button className="bg-amber-400 text-emerald-950 font-bold px-6 py-3 rounded-2xl hover:bg-amber-300 transition-all hover:shadow-[0_0_20px_rgba(251,191,36,0.3)]">
-            Book Package
+          <button 
+            onClick={handleWhatsApp}
+            className="bg-amber-400 text-emerald-950 font-bold px-6 py-3 rounded-2xl hover:bg-amber-300 transition-all hover:shadow-[0_0_20px_rgba(251,191,36,0.3)] flex items-center space-x-2"
+          >
+            <MessageCircle className="h-5 w-5" />
+            <span>Book Now</span>
           </button>
         </div>
       </div>

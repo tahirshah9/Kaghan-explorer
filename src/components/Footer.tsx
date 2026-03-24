@@ -58,6 +58,7 @@ export default function Footer() {
               <li><Link to="/hotels" className="hover:text-amber-400 transition-colors">Hotels & Stays</Link></li>
               <li><Link to="/packages" className="hover:text-amber-400 transition-colors">Tour Packages</Link></li>
               <li><Link to="/guide" className="hover:text-amber-400 transition-colors">Travel Guide</Link></li>
+              <li><Link to="/contact" className="hover:text-amber-400 transition-colors font-bold text-amber-400">Partner with Us</Link></li>
             </ul>
           </div>
 

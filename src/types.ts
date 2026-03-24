@@ -29,6 +29,7 @@ export interface TourPackage {
   excludes: string[];
   groupSize: string;
   image: string;
+  whatsappNumber?: string;
 }
 
 export interface ContactSubmission {
