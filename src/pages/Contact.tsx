@@ -25,10 +25,23 @@ export default function Contact() {
     try {
       if (!db) throw new Error("Database not initialized");
       
+      // Save to Firestore for record keeping
       await addDoc(collection(db, "inquiries"), {
         ...data,
         createdAt: serverTimestamp(),
       });
+
+      // Send email via backend API
+      try {
+        await fetch("/api/contact", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+      } catch (emailError) {
+        console.error("Email notification failed:", emailError);
+        // We don't block the user if only the email fails, as the inquiry is saved in DB
+      }
       
       setSuccess(true);
       reset();

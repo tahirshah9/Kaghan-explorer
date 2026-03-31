@@ -66,6 +66,24 @@
         "subscribedAt": { "type": "string", "format": "date-time" }
       },
       "required": ["email"]
+    },
+    "bookings": {
+      "title": "Tour Booking",
+      "description": "A booking for a tour package",
+      "type": "object",
+      "properties": {
+        "packageId": { "type": "string" },
+        "packageTitle": { "type": "string" },
+        "userName": { "type": "string" },
+        "userEmail": { "type": "string", "format": "email" },
+        "userPhone": { "type": "string" },
+        "travelDate": { "type": "string", "format": "date" },
+        "guests": { "type": "number" },
+        "totalPrice": { "type": "number" },
+        "status": { "type": "string", "enum": ["Pending", "Confirmed", "Cancelled"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["packageId", "userName", "userEmail", "travelDate", "guests"]
     }
   },
   "firestore": {
@@ -73,6 +91,7 @@
     "/hotels/{hotelId}": { "schema": "hotels", "description": "Collection of hotels" },
     "/packages/{pkgId}": { "schema": "packages", "description": "Collection of tour packages" },
     "/inquiries/{inquiryId}": { "schema": "inquiries", "description": "User contact messages" },
-    "/newsletter/{subId}": { "schema": "newsletter", "description": "Newsletter subscribers" }
+    "/newsletter/{subId}": { "schema": "newsletter", "description": "Newsletter subscribers" },
+    "/bookings/{bookingId}": { "schema": "bookings", "description": "User tour bookings" }
   }
 }

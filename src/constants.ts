@@ -9,7 +9,8 @@ export const DESTINATIONS: Destination[] = [
     bestTime: 'May - September',
     distance: '0 km (Main City)',
     difficulty: 'Easy',
-    category: 'Towns'
+    category: 'Towns',
+    featured: true
   },
   {
     id: 'saiful-muluk',
@@ -19,7 +20,8 @@ export const DESTINATIONS: Destination[] = [
     bestTime: 'June - August',
     distance: '9 km from Naran',
     difficulty: 'Moderate',
-    category: 'Lakes'
+    category: 'Lakes',
+    featured: true
   },
   {
     id: 'babusar-top',
@@ -29,7 +31,8 @@ export const DESTINATIONS: Destination[] = [
     bestTime: 'July - September',
     distance: '70 km from Naran',
     difficulty: 'Easy',
-    category: 'Mountains'
+    category: 'Mountains',
+    featured: true
   },
   {
     id: 'shogran',
@@ -39,7 +42,8 @@ export const DESTINATIONS: Destination[] = [
     bestTime: 'May - October',
     distance: '30 km from Balakot',
     difficulty: 'Easy',
-    category: 'Meadows'
+    category: 'Meadows',
+    featured: true
   },
   {
     id: 'lulusar-lake',
@@ -49,7 +53,8 @@ export const DESTINATIONS: Destination[] = [
     bestTime: 'June - September',
     distance: '50 km from Naran',
     difficulty: 'Easy',
-    category: 'Lakes'
+    category: 'Lakes',
+    featured: true
   },
   {
     id: 'siri-paye',
@@ -59,7 +64,8 @@ export const DESTINATIONS: Destination[] = [
     bestTime: 'June - August',
     distance: '6 km from Shogran',
     difficulty: 'Moderate',
-    category: 'Meadows'
+    category: 'Meadows',
+    featured: true
   },
   {
     id: 'lalazar',
@@ -133,7 +139,8 @@ export const PACKAGES: TourPackage[] = [
     excludes: ['Lunch', 'Dinner', 'Tickets'],
     groupSize: '2-4 People',
     image: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80',
-    whatsappNumber: '923000000000'
+    whatsappNumber: '923000000000',
+    featured: true
   },
   {
     id: '5-day-luxury',
@@ -145,7 +152,8 @@ export const PACKAGES: TourPackage[] = [
     excludes: ['Personal Expenses', 'Tips'],
     groupSize: '2-3 People',
     image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80',
-    whatsappNumber: '923000000000'
+    whatsappNumber: '923000000000',
+    featured: true
   },
   {
     id: 'adventure-trek',
@@ -157,6 +165,7 @@ export const PACKAGES: TourPackage[] = [
     excludes: ['Sleeping Bags', 'Personal Gear'],
     groupSize: '5-10 People',
     image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80',
-    whatsappNumber: '923000000000'
+    whatsappNumber: '923000000000',
+    featured: true
   }
 ];

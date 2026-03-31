@@ -69,6 +69,24 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    // Bookings: Public Create, Admin Read/Update/Delete
+    match /bookings/{bookingId} {
+      allow create: if true && 
+        request.resource.data.packageId is string && 
+        isValidEmail(request.resource.data.userEmail) &&
+        request.resource.data.guests is number;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Partnerships: Public Create, Admin Read/Update/Delete
+    match /partnerships/{partnerId} {
+      allow create: if true && 
+        request.resource.data.businessName is string && 
+        isValidEmail(request.resource.data.email) &&
+        request.resource.data.phone is string;
+      allow read, update, delete: if isAdmin();
+    }
+
     // User Profiles (for role management)
     match /users/{userId} {
       allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());

@@ -13,6 +13,7 @@ export default function Admin() {
   const [inquiries, setInquiries] = useState<any[]>([]);
   const [subscribers, setSubscribers] = useState<any[]>([]);
   const [partners, setPartners] = useState<any[]>([]);
+  const [bookings, setBookings] = useState<any[]>([]);
   const [destinations, setDestinations] = useState<any[]>([]);
   const [hotels, setHotels] = useState<any[]>([]);
   const [packages, setPackages] = useState<any[]>([]);
@@ -66,6 +67,11 @@ export default function Admin() {
       setPartners(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
 
+    const qBookings = query(collection(db, "bookings"), orderBy("createdAt", "desc"), limit(50));
+    const unsubBookings = onSnapshot(qBookings, (snapshot) => {
+      setBookings(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
     const unsubDests = onSnapshot(collection(db, "destinations"), (snapshot) => {
       setDestinations(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
@@ -82,6 +88,7 @@ export default function Admin() {
       unsubInquiries();
       unsubSubs();
       unsubPartners();
+      unsubBookings();
       unsubDests();
       unsubHotels();
       unsubPkgs();
@@ -145,6 +152,18 @@ export default function Admin() {
     }
   };
 
+  const updateBookingStatus = async (id: string, status: string) => {
+    if (!db || !isAdmin) return;
+    try {
+      const { updateDoc, doc } = await import("firebase/firestore");
+      await updateDoc(doc(db, "bookings", id), { status });
+      alert("Booking status updated!");
+    } catch (error) {
+      console.error("Error updating booking:", error);
+      alert("Error updating booking.");
+    }
+  };
+
   const deleteItem = async (id: string) => {
     if (!db || !isAdmin || !window.confirm("Are you sure you want to delete this item?")) return;
     try {
@@ -187,6 +206,7 @@ export default function Admin() {
         <nav className="space-y-4">
           {[
             { id: "dashboard", icon: LayoutDashboard, label: "Dashboard" },
+            { id: "bookings", icon: Package, label: "Bookings" },
             { id: "inquiries", icon: MessageSquare, label: "Inquiries" },
             { id: "subscribers", icon: Mail, label: "Subscribers" },
             { id: "partnerships", icon: Users, label: "Partnerships" },
@@ -250,11 +270,12 @@ export default function Admin() {
         <div className="bg-white rounded-[2rem] p-12 shadow-sm border border-emerald-100 min-h-[600px]">
           {activeTab === "dashboard" && (
             <div className="space-y-12">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                 {[
-                  { label: "Total Inquiries", value: inquiries.length.toString(), color: "bg-blue-50 text-blue-600" },
+                  { label: "Bookings", value: bookings.length.toString(), color: "bg-purple-50 text-purple-600" },
+                  { label: "Inquiries", value: inquiries.length.toString(), color: "bg-blue-50 text-blue-600" },
                   { label: "Subscribers", value: subscribers.length.toString(), color: "bg-amber-50 text-amber-600" },
-                  { label: "Total Revenue", value: "Rs. 1.2M", color: "bg-emerald-50 text-emerald-600" },
+                  { label: "Revenue", value: `Rs. ${(bookings.filter(b => b.status === "Confirmed").reduce((acc, b) => acc + (b.totalPrice || 0), 0) / 1000).toFixed(1)}k`, color: "bg-emerald-50 text-emerald-600" },
                 ].map((stat, i) => (
                   <div key={i} className={`${stat.color} p-8 rounded-3xl space-y-2`}>
                     <p className="text-sm font-bold uppercase tracking-wider opacity-60">{stat.label}</p>
@@ -262,31 +283,113 @@ export default function Admin() {
                   </div>
                 ))}
               </div>
-              <div className="space-y-4">
-                <h3 className="text-xl font-bold text-emerald-950">Recent Inquiries</h3>
-                <div className="border border-emerald-50 rounded-2xl overflow-hidden">
-                  <table className="w-full text-left">
-                    <thead className="bg-emerald-50 text-emerald-900 text-sm uppercase font-bold">
-                      <tr>
-                        <th className="px-6 py-4">User</th>
-                        <th className="px-6 py-4">Subject</th>
-                        <th className="px-6 py-4">Date</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-emerald-50">
-                      {inquiries.slice(0, 5).map((inq) => (
-                        <tr key={inq.id} className="hover:bg-emerald-50/30 transition-colors">
-                          <td className="px-6 py-4 text-emerald-950 font-medium">{inq.name}</td>
-                          <td className="px-6 py-4 text-emerald-800/60">{inq.subject}</td>
-                          <td className="px-6 py-4 text-emerald-800/60">
-                            {inq.createdAt?.toDate ? inq.createdAt.toDate().toLocaleDateString() : "Just now"}
-                          </td>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div className="space-y-4">
+                  <h3 className="text-xl font-bold text-emerald-950">Recent Bookings</h3>
+                  <div className="border border-emerald-50 rounded-2xl overflow-hidden">
+                    <table className="w-full text-left">
+                      <thead className="bg-emerald-50 text-emerald-900 text-sm uppercase font-bold">
+                        <tr>
+                          <th className="px-6 py-4">User</th>
+                          <th className="px-6 py-4">Package</th>
+                          <th className="px-6 py-4">Status</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="divide-y divide-emerald-50">
+                        {bookings.slice(0, 5).map((booking) => (
+                          <tr key={booking.id} className="hover:bg-emerald-50/30 transition-colors">
+                            <td className="px-6 py-4 text-emerald-950 font-medium">{booking.userName}</td>
+                            <td className="px-6 py-4 text-emerald-800/60">{booking.packageTitle}</td>
+                            <td className="px-6 py-4">
+                              <span className={`text-[10px] font-bold px-2 py-1 rounded-full uppercase ${
+                                booking.status === "Confirmed" ? "bg-emerald-100 text-emerald-700" :
+                                booking.status === "Cancelled" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"
+                              }`}>
+                                {booking.status || "Pending"}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <h3 className="text-xl font-bold text-emerald-950">Recent Inquiries</h3>
+                  <div className="border border-emerald-50 rounded-2xl overflow-hidden">
+                    <table className="w-full text-left">
+                      <thead className="bg-emerald-50 text-emerald-900 text-sm uppercase font-bold">
+                        <tr>
+                          <th className="px-6 py-4">User</th>
+                          <th className="px-6 py-4">Subject</th>
+                          <th className="px-6 py-4">Date</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-emerald-50">
+                        {inquiries.slice(0, 5).map((inq) => (
+                          <tr key={inq.id} className="hover:bg-emerald-50/30 transition-colors">
+                            <td className="px-6 py-4 text-emerald-950 font-medium">{inq.name}</td>
+                            <td className="px-6 py-4 text-emerald-800/60">{inq.subject}</td>
+                            <td className="px-6 py-4 text-emerald-800/60">
+                              {inq.createdAt?.toDate ? inq.createdAt.toDate().toLocaleDateString() : "Just now"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
+            </div>
+          )}
+
+          {activeTab === "bookings" && (
+            <div className="space-y-6">
+              {bookings.map((booking) => (
+                <div key={booking.id} className="p-6 border border-emerald-50 rounded-2xl space-y-4">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-bold text-emerald-950 text-xl">{booking.packageTitle}</h4>
+                      <p className="text-sm text-emerald-800/60 uppercase font-bold tracking-wider">Booking ID: {booking.id}</p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <select 
+                        value={booking.status || "Pending"}
+                        onChange={(e) => updateBookingStatus(booking.id, e.target.value)}
+                        className="text-xs font-bold px-3 py-2 rounded-xl border border-emerald-100 bg-white"
+                      >
+                        <option value="Pending">Pending</option>
+                        <option value="Confirmed">Confirmed</option>
+                        <option value="Cancelled">Cancelled</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div>
+                      <p className="text-emerald-800/40 font-bold uppercase text-[10px]">Customer</p>
+                      <p className="text-emerald-950 font-medium">{booking.userName}</p>
+                    </div>
+                    <div>
+                      <p className="text-emerald-800/40 font-bold uppercase text-[10px]">Email</p>
+                      <p className="text-emerald-950 font-medium">{booking.userEmail}</p>
+                    </div>
+                    <div>
+                      <p className="text-emerald-800/40 font-bold uppercase text-[10px]">Travel Date</p>
+                      <p className="text-emerald-950 font-medium">{booking.travelDate}</p>
+                    </div>
+                    <div>
+                      <p className="text-emerald-800/40 font-bold uppercase text-[10px]">Guests</p>
+                      <p className="text-emerald-950 font-medium">{booking.guests}</p>
+                    </div>
+                  </div>
+                  <div className="pt-4 border-t border-emerald-50 flex justify-between items-center">
+                    <p className="text-emerald-950 font-bold">Total Price: Rs. {booking.totalPrice?.toLocaleString()}</p>
+                    <p className="text-[10px] text-emerald-800/40 uppercase">
+                      Booked on: {booking.createdAt?.toDate ? booking.createdAt.toDate().toLocaleString() : "Just now"}
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
 
